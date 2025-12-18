@@ -17,43 +17,53 @@ def get_spotify_client():
         open_browser=False
     )
 
-    # 1️⃣ Se já existe token
+    # 1️⃣ Já tem token salvo
     token_info = auth_manager.get_cached_token()
     if token_info:
         return spotipy.Spotify(auth_manager=auth_manager)
 
-    # 2️⃣ Se voltou do Spotify com ?code=
+    # 2️⃣ Voltou do Spotify com ?code=
     query_params = st.query_params
     if "code" in query_params:
         auth_manager.get_access_token(query_params["code"])
         st.query_params.clear()
         st.rerun()
 
-    # 3️⃣ Tela de login (HTML REAL)
+    # 3️⃣ Tela de login
     auth_url = auth_manager.get_authorize_url()
 
     components.html(
         f"""
-        <div style="text-align:center; margin-top:120px;">
+        <div style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            height:60vh;
+            color:white;
+            font-family:Arial;
+        ">
             <h2>🔐 Login necessário</h2>
             <p>Conecte sua conta do Spotify para ver seus dados</p>
 
-            <a href="{auth_url}" target="_top" style="text-decoration:none;">
-                <button style="
+            <button
+                onclick="window.top.location.href='{auth_url}'"
+                style="
                     background-color:#1DB954;
                     color:white;
-                    padding:14px 28px;
+                    padding:14px 30px;
                     border:none;
                     border-radius:30px;
                     font-size:16px;
                     cursor:pointer;
-                ">
-                    🎧 Entrar com Spotify
-                </button>
-            </a>
+                    margin-top:20px;
+                "
+            >
+                🎧 Entrar com Spotify
+            </button>
         </div>
         """,
-        height=280
+        height=320
     )
 
     st.stop()
