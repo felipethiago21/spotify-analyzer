@@ -21,11 +21,11 @@ def get_spotify_client():
 
     # 🔁 Se veio código do Spotify, troca por token
     if code:
-        auth_manager.get_access_token(code)
-        st.query_params.clear()  # limpa ?code da URL
+        auth_manager.get_access_token(code, as_dict=False)
+        st.query_params.clear()
         st.rerun()
 
-    # 🔐 Se ainda não tem token válido → login
+    # 🔐 Se não tem token válido → login
     token = auth_manager.get_cached_token()
     if not token or not auth_manager.validate_token(token):
         auth_url = auth_manager.get_authorize_url()
@@ -36,5 +36,4 @@ def get_spotify_client():
         )
         st.stop()
 
-    # ✅ Token válido → cliente Spotify
     return spotipy.Spotify(auth_manager=auth_manager)
