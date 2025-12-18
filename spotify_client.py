@@ -18,13 +18,28 @@ def get_spotify_client():
 
     token_info = auth_manager.get_cached_token()
 
+    # 🔐 SE NÃO TEM TOKEN → MOSTRA BOTÃO
     if not token_info:
-        auth_url = auth_manager.get_authorize_url()
-
-        st.markdown("## 🔐 Login necessário")
         st.markdown(
-            f"👉 [Clique aqui para entrar com o Spotify]({auth_url})"
+            """
+            <div style="text-align: center; margin-top: 80px;">
+                <h2>🎵 Spotify Analyzer</h2>
+                <p>Faça login para visualizar suas estatísticas musicais</p>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+
+        if st.button("🎧 Entrar com Spotify"):
+            auth_url = auth_manager.get_authorize_url()
+            st.markdown(
+                f"""
+                <meta http-equiv="refresh" content="0; url={auth_url}">
+                """,
+                unsafe_allow_html=True
+            )
+            st.stop()
+
         st.stop()
 
     return spotipy.Spotify(auth_manager=auth_manager)
