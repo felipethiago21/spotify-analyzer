@@ -13,6 +13,7 @@ def get_spotify_client():
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
         scope=scope,
         open_browser=False,
+        cache_handler=None,  # 🔴 ESSENCIAL NO STREAMLIT CLOUD
     )
 
     # 🔎 Captura parâmetros da URL
@@ -27,7 +28,7 @@ def get_spotify_client():
 
     # 🔐 Se não tem token válido → login
     token = auth_manager.get_cached_token()
-    if not token or not auth_manager.validate_token(token):
+    if not token:
         auth_url = auth_manager.get_authorize_url()
 
         st.markdown("## 🔐 Login necessário")
