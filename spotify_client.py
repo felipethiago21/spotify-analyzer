@@ -12,34 +12,47 @@ def get_spotify_client():
         client_secret=os.environ.get("SPOTIPY_CLIENT_SECRET"),
         redirect_uri=os.environ.get("SPOTIPY_REDIRECT_URI"),
         scope=scope,
-        open_browser=False,
-        cache_path=".spotify_cache"
+        cache_path=".spotify_cache",
+        open_browser=False
     )
 
+    # 1️⃣ Se já existe token válido, retorna o cliente
     token_info = auth_manager.get_cached_token()
+    if token_info:
+        return spotipy.Spotify(auth_manager=auth_manager)
 
-    # 🔐 SE NÃO TEM TOKEN → MOSTRA BOTÃO
-    if not token_info:
-        st.markdown(
-            """
-            <div style="text-align: center; margin-top: 80px;">
-                <h2>🎵 Spotify Analyzer</h2>
-                <p>Faça login para visualizar suas estatísticas musicais</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+    # 2️⃣ Se voltou do Spotify com ?code=
+    query_params = st.query_params
+    if "code" in query_params:
+        auth_manager.get_access_token(query_params["code"])
+        st.query_params.clear()
+        st.rerun()
 
-        if st.button("🎧 Entrar com Spotify"):
-            auth_url = auth_manager.get_authorize_url()
-            st.markdown(
-                f"""
-                <meta http-equiv="refresh" content="0; url={auth_url}">
-                """,
-                unsafe_allow_html=True
-            )
-            st.stop()
+    # 3️⃣ Caso contrário, mostra botão de login (FORA DO IFRAME)
+    auth_url = auth_manager.get_authorize_url()
 
-        st.stop()
+    st.markdown(
+        f"""
+        <div style="text-align:center; margin-top:100px;">
+            <h2>🔐 Login necessário</h2>
+            <p>Conecte sua conta do Spotify para ver seus dados</p>
 
-    return spotipy.Spotify(auth_manager=auth_manager)
+            <a href="{auth_url}" target="_top">
+                <button style="
+                    background-color:#1DB954;
+                    color:white;
+                    padding:14px 28px;
+                    border:none;
+                    border-radius:30px;
+                    font-size:16px;
+                    cursor:pointer;
+                ">
+                    🎧 Entrar com Spotify
+                </button>
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.stop()
