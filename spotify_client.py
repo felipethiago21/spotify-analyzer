@@ -16,19 +16,13 @@ def get_spotify_client():
         cache_handler=None,  # 🔴 ESSENCIAL NO STREAMLIT CLOUD
     )
 
-    # 🔎 Captura parâmetros da URL
-    query_params = st.query_params
-    code = query_params.get("code")
+    try:
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+        # força chamada simples para validar token
+        sp.current_user()
+        return sp
 
-    # 🔁 Se veio código do Spotify, troca por token
-    if code:
-        auth_manager.get_access_token(code, as_dict=False)
-        st.query_params.clear()
-        st.rerun()
-
-    # 🔐 Se não tem token válido → login
-    token = auth_manager.get_cached_token()
-    if not token:
+    except Exception:
         auth_url = auth_manager.get_authorize_url()
 
         st.markdown("## 🔐 Login necessário")
@@ -36,5 +30,3 @@ def get_spotify_client():
             f"👉 [Clique aqui para entrar com o Spotify]({auth_url})"
         )
         st.stop()
-
-    return spotipy.Spotify(auth_manager=auth_manager)
