@@ -8,21 +8,17 @@ def get_spotify_client():
     scope = "user-top-read"
 
     auth_manager = SpotifyOAuth(
-        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
-        client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
-        redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"),
+        client_id=os.environ.get("SPOTIPY_CLIENT_ID"),
+        client_secret=os.environ.get("SPOTIPY_CLIENT_SECRET"),
+        redirect_uri=os.environ.get("SPOTIPY_REDIRECT_URI"),
         scope=scope,
         open_browser=False,
-        cache_handler=None,  # 🔴 ESSENCIAL NO STREAMLIT CLOUD
+        cache_path=".spotify_cache"
     )
 
-    try:
-        sp = spotipy.Spotify(auth_manager=auth_manager)
-        # força chamada simples para validar token
-        sp.current_user()
-        return sp
+    token_info = auth_manager.get_cached_token()
 
-    except Exception:
+    if not token_info:
         auth_url = auth_manager.get_authorize_url()
 
         st.markdown("## 🔐 Login necessário")
@@ -30,3 +26,5 @@ def get_spotify_client():
             f"👉 [Clique aqui para entrar com o Spotify]({auth_url})"
         )
         st.stop()
+
+    return spotipy.Spotify(auth_manager=auth_manager)
