@@ -1,6 +1,7 @@
 import os
 import spotipy
 import streamlit as st
+import streamlit.components.v1 as components
 from spotipy.oauth2 import SpotifyOAuth
 
 
@@ -16,7 +17,7 @@ def get_spotify_client():
         open_browser=False
     )
 
-    # 1️⃣ Se já existe token válido, retorna o cliente
+    # 1️⃣ Se já existe token
     token_info = auth_manager.get_cached_token()
     if token_info:
         return spotipy.Spotify(auth_manager=auth_manager)
@@ -28,16 +29,16 @@ def get_spotify_client():
         st.query_params.clear()
         st.rerun()
 
-    # 3️⃣ Caso contrário, mostra botão de login (FORA DO IFRAME)
+    # 3️⃣ Tela de login (HTML REAL)
     auth_url = auth_manager.get_authorize_url()
 
-    st.markdown(
+    components.html(
         f"""
-        <div style="text-align:center; margin-top:100px;">
+        <div style="text-align:center; margin-top:120px;">
             <h2>🔐 Login necessário</h2>
             <p>Conecte sua conta do Spotify para ver seus dados</p>
 
-            <a href="{auth_url}" target="_top">
+            <a href="{auth_url}" target="_top" style="text-decoration:none;">
                 <button style="
                     background-color:#1DB954;
                     color:white;
@@ -52,7 +53,7 @@ def get_spotify_client():
             </a>
         </div>
         """,
-        unsafe_allow_html=True
+        height=280
     )
 
     st.stop()
